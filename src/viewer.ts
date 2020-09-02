@@ -104,7 +104,7 @@ class Viewer {
             });
 
         // create the light
-        const light = new pc.Entity();
+        const light = new pc.Entity("Light");
         light.addComponent("light", {
             type: "directional",
             color: new pc.Color(1, 1, 1),
@@ -138,10 +138,10 @@ class Viewer {
         app.on('frameend', this.onFrameend, this);
 
         // create the scene and debug root nodes
-        const sceneRoot = new pc.Entity("sceneRoot", app);
+        const sceneRoot = new pc.Entity("Scene", app);
         app.root.addChild(sceneRoot);
 
-        const debugRoot = new pc.Entity("debugRoot", app);
+        const debugRoot = new pc.Entity("Debug", app);
         app.root.addChild(debugRoot);
 
         // store app things
@@ -688,6 +688,9 @@ class Viewer {
         containerAsset.on('load', () => {
             this.onLoaded(null, containerAsset);
         });
+        containerAsset.on('error', (err) => {
+            console.log(err);
+        });
         this.app.assets.add(containerAsset);
         this.app.assets.load(containerAsset);
     }
@@ -695,7 +698,7 @@ class Viewer {
     // load the list of urls.
     // urls can reference glTF files, glb files and skybox textures.
     // returns true if a model was loaded.
-    load(urls: Array<URL>) {
+    load(urls: URL[]) {
         // convert single url to list
         if (!Array.isArray(urls)) {
             urls = [urls];
@@ -1009,7 +1012,7 @@ class Viewer {
 
         if (!entity) {
             // create entity
-            entity = new pc.Entity();
+            entity = new pc.Entity(asset.name);
             this.entities.push(entity);
             this.sceneRoot.addChild(entity);
 
