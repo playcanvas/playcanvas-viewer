@@ -730,7 +730,6 @@ class Viewer {
             a = this.animationMap[animationName];
         }
         this.entities.forEach(function (e) {
-            // @ts-ignore
             const anim = e.anim;
             if (anim) {
                 anim.setBoolean('loop', !!a);
@@ -743,7 +742,6 @@ class Viewer {
     // stop playing animations
     stop() {
         this.entities.forEach(function (e) {
-            // @ts-ignore
             const anim = e.anim;
             if (anim) {
                 anim.findAnimationLayer('all_layer').pause();
@@ -755,7 +753,6 @@ class Viewer {
     setSpeed(speed: number) {
         this.animSpeed = speed;
         this.entities.forEach(function (e) {
-            // @ts-ignore
             const anim = e.anim;
             if (anim) {
                 anim.speed = speed;
@@ -791,7 +788,6 @@ class Viewer {
     setAnimationProgress(progress: number) {
         this.observer.set('animation.playing', false);
         this.entities.forEach(e => {
-            // @ts-ignore
             const anim = e.anim;
             anim.playing = true;
             anim.baseLayer.activeStateCurrentTime = anim.baseLayer.activeStateDuration * progress;
@@ -901,7 +897,6 @@ class Viewer {
         // or an animation is loaded and we're animating
         let isAnimationPlaying = false;
         for (let i = 0; i < this.entities.length; ++i) {
-            // @ts-ignore
             const anim = this.entities[i].anim;
             if (anim && anim.findAnimationLayer('all_layer').playing) {
                 isAnimationPlaying = true;
@@ -1091,7 +1086,6 @@ class Viewer {
         // create animation component
         if (animLoaded) {
             // create the anim component if there isn't one already
-            // @ts-ignore TODO not defined in pc
             if (!entity.anim) {
                 entity.addComponent('anim', {
                     activate: true,
@@ -1203,7 +1197,7 @@ class Viewer {
         const entity = this.entities[this.entities.length - 1];
 
         // create states
-        const states : Array<{ name: string, speed?: number }> = [{ name: 'START' }];
+        const states: pc.AnimStateGraphDataState[] = [{ name: 'START' }];
         this.animTracks.forEach(function (t, i) {
             states.push({ name: 'track_' + i, speed: 1 });
         });
@@ -1211,7 +1205,7 @@ class Viewer {
         // create a transition for each state
         const transition = this.animTransition;
         const loops = this.animLoops;
-        const transitions = states.map(function (s, i) {
+        const transitions: pc.AnimStateGraphDataTransition[] = states.map(function (s, i) {
             return {
                 from: s.name,
                 to: states[(i + 1) % states.length || 1].name,
@@ -1219,29 +1213,25 @@ class Viewer {
                 exitTime: s.name === 'START' ? 0.0 : loops,
                 conditions: [{
                     parameterName: 'loop',
-                    predicate: "EQUAL_TO",
+                    predicate: pc.ANIM_EQUAL_TO,
                     value: false
                 }],
-                // @ts-ignore
                 interruptionSource: pc.ANIM_INTERRUPTION_NEXT
             };
         });
 
         // create the state graph instance
-        // @ts-ignore TODO anim property missing from pc.Entity
         entity.anim.loadStateGraph(new pc.AnimStateGraph({
             layers: [{ name: 'all_layer', states: states, transitions: transitions }],
             parameters: {
                 loop: {
                     name: 'loop',
-                    // @ts-ignore
                     type: pc.ANIM_PARAMETER_BOOLEAN,
                     value: false
                 }
             }
         }));
 
-        // @ts-ignore TODO anim property missing from pc.Entity
         const allLayer = entity.anim.findAnimationLayer('all_layer');
         this.animTracks.forEach(function (t: any, i: number) {
             const name = states[i + 1].name;
